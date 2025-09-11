@@ -1,0 +1,11 @@
+[package]
+name = "actix-api-mbu"
+version = "0.1.0"
+edition = "2024"
+authors = ["Inwerejosic", "inwerejosic@protonmail.com"]
+
+[dependencies]
+actix-web = "4.11.0"
+diesel = { version = "2.2.12", features = ["sqlite"] }
+dotenv = "0.15.0"
+serde = "1.0.219"
