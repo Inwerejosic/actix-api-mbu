@@ -3,8 +3,9 @@ mod handlers;
 mod model;
 mod schema;
 
+// Importing the handlers to be called in the route
 use  actix_web::{web, App, HttpServer};
-use crate::handlers::{create_member, delete_member, get_member, update_member, get_member_by_id};
+use crate::handlers::{create_member, get_member, get_member_by_id, update_member, delete_member};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

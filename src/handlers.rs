@@ -26,6 +26,20 @@ pub async fn get_member_by_id(path_id: web::Path<i32>) -> Result<HttpResponse> {
     }
 }
 
+// Create Handler
+pub async fn create_member(new_member: web::Json<NewMember>) -> Result<HttpResponse> {
+    use crate::schema::member::dsl::*;
+
+    let mut connection = establish_connection();
+
+    diesel::insert_into(member)
+        .values(new_member.into_inner())
+        .execute(&mut connection)
+        .expect("Error inserting new member");
+
+    Ok(HttpResponse::Ok().json("Data inserted into the Team database"))
+}
+
 // Update Handler
 pub async fn update_member(
     path_id: web::Path<i32>,
@@ -47,20 +61,6 @@ pub async fn update_member(
         .expect("Failed to fetch updated member");
 
     Ok(HttpResponse::Ok().json(updated))
-}
-
-// Create Handler
-pub async fn create_member(new_member: web::Json<NewMember>) -> Result<HttpResponse> {
-    use crate::schema::member::dsl::*;
-
-    let mut connection = establish_connection();
-
-    diesel::insert_into(member)
-        .values(new_member.into_inner())
-        .execute(&mut connection)
-        .expect("Error inserting new member");
-
-    Ok(HttpResponse::Ok().json("Data inserted into the Team database"))
 }
 
 // Delete Handler
