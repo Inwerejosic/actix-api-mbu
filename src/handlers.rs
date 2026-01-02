@@ -4,15 +4,28 @@ use diesel::prelude::*;
 use crate::model::{Member, NewMember, UpdateMember};
 
 // Get all Handler
+// pub async fn get_member() -> Result<HttpResponse> {
+//     use crate::schema::member::dsl::*;
+//
+//     let mut connection = establish_connection();
+//     let members = member
+//         .load::<Member>(&mut connection)
+//         .expect("Error Loading members");
+//     Ok(HttpResponse::Ok().json(members))
+// }
+
 pub async fn get_member() -> Result<HttpResponse> {
     use crate::schema::member::dsl::*;
 
     let mut connection = establish_connection();
-    let members = member
+
+    let results = member
         .load::<Member>(&mut connection)
-        .expect("Error Loading members");
-    Ok(HttpResponse::Ok().json(members))
+        .expect("Error loading members");
+
+    Ok(HttpResponse::Ok().json(results)) // ✅ returns JSON array
 }
+
 
 // Get one Handler
 pub async fn get_member_by_id(path_id: web::Path<i32>) -> Result<HttpResponse> {

@@ -5,6 +5,7 @@ edition = "2024"
 authors = ["Inwerejosic", "inwerejosic@protonmail.com"]
 
 [dependencies]
+actix-cors = "0.7.1"
 actix-web = "4.11.0"
 diesel = { version = "2.2.12", features = ["sqlite"] }
 dotenv = "0.15.0"
