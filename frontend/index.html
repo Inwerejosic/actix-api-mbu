@@ -3,67 +3,74 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Member Registry</title>
+        <title>Member Management System</title>
         <style>
             body {
-                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-                margin: 40px;
-                background-color: #f8f9fa;
+                font-family: sans-serif;
+                margin: 20px;
+                background-color: #f4f7f6;
             }
             .container {
-                max-width: 900px;
+                max-width: 800px;
                 margin: auto;
                 background: white;
-                padding: 25px;
+                padding: 20px;
                 border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
-
             h2 {
-                color: #333;
                 border-bottom: 2px solid #eee;
                 padding-bottom: 10px;
             }
 
-            /* Grid Form Layout */
-            .form-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 15px;
+            /* Form Layout */
+            .form-section {
+                background: #e9ecef;
+                padding: 15px;
+                border-radius: 5px;
                 margin-bottom: 20px;
             }
+            .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            input {
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
             .full-width {
-                grid-column: span 3;
+                grid-column: span 2;
             }
 
-            input {
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                width: 100%;
-                box-sizing: border-box;
-            }
             button {
-                padding: 10px 20px;
+                padding: 10px;
                 border: none;
                 border-radius: 4px;
                 cursor: pointer;
-                font-weight: bold;
+                color: white;
+                margin-top: 10px;
             }
-
             .btn-submit {
                 background-color: #28a745;
-                color: white;
                 width: 100%;
+            }
+            .btn-cancel {
+                background-color: #6c757d;
+                width: 100%;
+                margin-top: 5px;
+            }
+            .btn-edit {
+                background-color: #ffc107;
+                color: black;
+                margin: 2px;
             }
             .btn-delete {
                 background-color: #dc3545;
-                color: white;
-                padding: 5px 10px;
-                font-size: 12px;
+                margin: 2px;
             }
 
-            /* Table Styling */
             table {
                 width: 100%;
                 border-collapse: collapse;
@@ -72,65 +79,82 @@
             th,
             td {
                 text-align: left;
-                padding: 12px;
-                border-bottom: 1px solid #eee;
+                padding: 10px;
+                border-bottom: 1px solid #ddd;
             }
             th {
-                background-color: #f4f4f4;
-            }
-            tr:hover {
-                background-color: #fafafa;
+                background: #eee;
             }
         </style>
     </head>
     <body>
         <div class="container">
-            <h2>Add New Member</h2>
-            <form id="memberForm">
-                <div class="form-grid">
-                    <input
-                        type="text"
-                        id="f_name"
-                        placeholder="First Name"
-                        required
-                    />
-                    <input type="text" id="m_name" placeholder="Middle Name" />
-                    <input
-                        type="text"
-                        id="l_name"
-                        placeholder="Last Name"
-                        required
-                    />
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="Email Address"
-                        required
-                    />
-                    <input type="number" id="age" placeholder="Age" required />
-                    <input
-                        type="text"
-                        id="address"
-                        class="full-width"
-                        placeholder="Home Address"
-                        required
-                    />
-                </div>
-                <button type="submit" class="btn-submit">
-                    Register Member
-                </button>
-            </form>
+            <div class="form-section">
+                <h2 id="formTitle">Add New Member</h2>
+                <form id="memberForm">
+                    <input type="hidden" id="memberId" />
+
+                    <div class="form-grid">
+                        <input
+                            type="text"
+                            id="f_name"
+                            placeholder="First Name"
+                            required
+                        />
+                        <input
+                            type="text"
+                            id="m_name"
+                            placeholder="Middle Name"
+                        />
+                        <input
+                            type="text"
+                            id="l_name"
+                            placeholder="Last Name"
+                            required
+                        />
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="Email"
+                            required
+                        />
+                        <input
+                            type="number"
+                            id="age"
+                            placeholder="Age"
+                            required
+                        />
+                        <input
+                            type="text"
+                            id="address"
+                            class="full-width"
+                            placeholder="Address"
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-submit">
+                        Register Member
+                    </button>
+                    <button
+                        type="button"
+                        id="cancelBtn"
+                        class="btn-cancel"
+                        style="display: none"
+                    >
+                        Cancel Edit
+                    </button>
+                </form>
+            </div>
 
             <h2>Member Directory</h2>
-            <table id="memberTable">
+            <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Full Name</th>
+                        <th>Name</th>
                         <th>Email</th>
-                        <th>Age</th>
-                        <th>Address</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="memberList"></tbody>
@@ -139,69 +163,107 @@
 
         <script>
             const API_URL = "http://localhost:7070";
+            let isEditing = false;
 
-            // 1. Fetch all members
+            // 1. Fetch and Display
             async function fetchMembers() {
-                try {
-                    const response = await fetch(`${API_URL}/members`);
-                    const members = await response.json();
-                    const listBody = document.getElementById("memberList");
-                    listBody.innerHTML = "";
+                const response = await fetch(`${API_URL}/members`);
+                const members = await response.json();
+                const listBody = document.getElementById("memberList");
+                listBody.innerHTML = "";
 
-                    members.forEach((m) => {
-                        listBody.innerHTML += `
-                    <tr>
-                        <td>${m.id}</td>
-                        <td>${m.f_name} ${m.m_name || ""} ${m.l_name}</td>
-                        <td>${m.email}</td>
-                        <td>${m.age}</td>
-                        <td>${m.address}</td>
-                        <td>
-                            <button class="btn-delete" onclick="deleteMember(${m.id})">Delete</button>
-                        </td>
-                    </tr>
-                `;
-                    });
-                } catch (err) {
-                    console.error("Failed to fetch:", err);
-                }
+                members.forEach((m) => {
+                    listBody.innerHTML += `
+                <tr>
+                    <td>${m.id}</td>
+                    <td>${m.f_name} ${m.l_name}</td>
+                    <td>${m.email}</td>
+                    <td>
+                        <button class="btn-edit" onclick="setupEdit(${JSON.stringify(m).replace(/"/g, "&quot;")})">Edit</button>
+                        <button class="btn-delete" onclick="deleteMember(${m.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+                });
             }
 
-            // 2. Create a new member
+            // 2. Handle Form Submit (POST or PUT)
             document
                 .getElementById("memberForm")
                 .addEventListener("submit", async (e) => {
                     e.preventDefault();
 
-                    // Construct the NewMember object to match Rust NewMember struct
-                    const newMember = {
+                    const id = document.getElementById("memberId").value;
+                    const memberData = {
                         f_name: document.getElementById("f_name").value,
                         m_name: document.getElementById("m_name").value,
                         l_name: document.getElementById("l_name").value,
                         email: document.getElementById("email").value,
                         address: document.getElementById("address").value,
-                        age: parseInt(document.getElementById("age").value), // Ensure age is an i32 (integer)
+                        age: parseInt(document.getElementById("age").value),
                     };
 
-                    try {
-                        const response = await fetch(`${API_URL}/member`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(newMember),
-                        });
+                    let url = `${API_URL}/member`;
+                    let method = "POST";
 
-                        if (response.ok) {
-                            document.getElementById("memberForm").reset();
-                            fetchMembers();
-                        }
-                    } catch (err) {
-                        alert("Error saving member");
+                    // If editing, change to PUT and update the URL
+                    if (isEditing) {
+                        url = `${API_URL}/member/${id}`;
+                        method = "PUT";
                     }
+
+                    await fetch(url, {
+                        method: method,
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(memberData),
+                    });
+
+                    resetForm();
+                    fetchMembers();
                 });
 
-            // 3. Delete a member
+            // 3. Setup Edit Mode
+            window.setupEdit = (member) => {
+                isEditing = true;
+                document.getElementById("formTitle").innerText =
+                    "Edit Member #" + member.id;
+                document.getElementById("submitBtn").innerText =
+                    "Update Member";
+                document.getElementById("submitBtn").style.backgroundColor =
+                    "#007bff";
+                document.getElementById("cancelBtn").style.display = "block";
+
+                // Fill form fields
+                document.getElementById("memberId").value = member.id;
+                document.getElementById("f_name").value = member.f_name;
+                document.getElementById("m_name").value = member.m_name;
+                document.getElementById("l_name").value = member.l_name;
+                document.getElementById("email").value = member.email;
+                document.getElementById("address").value = member.address;
+                document.getElementById("age").value = member.age;
+            };
+
+            // 4. Reset Form
+            function resetForm() {
+                isEditing = false;
+                document.getElementById("memberForm").reset();
+                document.getElementById("memberId").value = "";
+                document.getElementById("formTitle").innerText =
+                    "Add New Member";
+                document.getElementById("submitBtn").innerText =
+                    "Register Member";
+                document.getElementById("submitBtn").style.backgroundColor =
+                    "#28a745";
+                document.getElementById("cancelBtn").style.display = "none";
+            }
+
+            document
+                .getElementById("cancelBtn")
+                .addEventListener("click", resetForm);
+
+            // 5. Delete Member
             async function deleteMember(id) {
-                if (confirm(`Are you sure you want to delete member #${id}?`)) {
+                if (confirm("Delete this member?")) {
                     await fetch(`${API_URL}/member/delete/${id}`, {
                         method: "DELETE",
                     });
